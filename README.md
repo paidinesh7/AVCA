@@ -33,7 +33,16 @@ An AI-powered portfolio tracking system for investment teams. Drop company updat
    - `Claude Summary/Red Flags & Follow-ups.html` — action items and warnings
    - `Claude Summary/Promise Tracker.html` — company accountability dashboard
    - `Claude Summary/Collaboration Opportunities.html` — cross-portfolio synergies
+   - `Claude Summary/Deal Flow.html` — pitch evaluation & prioritization
    - `Claude Summary/Team Update - {Month} {Year}.html` — shareable team summary
+
+6. **Evaluate incoming pitches** (optional)
+   ```bash
+   mkdir -p "Deal Flow/Fintech - NovaPay"
+   # Drop pitch deck into the folder
+   claude
+   ```
+   Then say: *"Evaluate the new pitches"*
 
 ## What You Get
 
@@ -44,6 +53,7 @@ An AI-powered portfolio tracking system for investment teams. Drop company updat
 | **Red Flags & Follow-ups** | HTML | Urgent items, financial warnings, positive signals, promises to track |
 | **Promise Tracker** | HTML | Accountability dashboard — tracks company commitments and delivery rates |
 | **Collaboration Opportunities** | HTML | Cross-portfolio synergies and value creation opportunities (externally shareable) |
+| **Deal Flow** | HTML | Pitch evaluation & prioritization — scores incoming pitches on a 100-point rubric |
 | **Team Update** | HTML | Shareable summary — one card per company, designed for team distribution |
 | **Monthly Report** | Markdown | End-of-month compilation for the investment team |
 
@@ -56,7 +66,7 @@ Claude reads the `CLAUDE.md` file in this repo for all its instructions. When yo
 - How to update the HTML outputs
 - How to handle Excel files (via Python/openpyxl)
 
-### Processing Flow
+### Portfolio Processing Flow
 
 ```
 Drop files into company folder
@@ -70,6 +80,22 @@ Updates 5 files: Running Summary + Dashboard + Red Flags + Promise Tracker + Col
 Asks which company to process next
         ↓
 After all companies → generates Team Update
+```
+
+### Pitch Evaluation Flow
+
+```
+Drop pitch docs into Deal Flow/{Sector} - {Company}/
+        ↓
+Run Claude → detects new pitches
+        ↓
+Evaluates ONE pitch at a time (100-point rubric)
+        ↓
+Updates 1 file: Deal Flow.html (pitch card + comparison table + sectors)
+        ↓
+Asks which pitch to evaluate next
+        ↓
+If invested → graduates to portfolio company folder
 ```
 
 ### Detecting New Files
@@ -92,10 +118,17 @@ portfolio-tracker/
 │   ├── Red Flags & Follow-ups.html
 │   ├── Promise Tracker.html
 │   ├── Collaboration Opportunities.html
+│   ├── Deal Flow.html                ← Pitch evaluation & prioritization
 │   ├── Team Update - Feb 2026.html
 │   ├── Running Summary.md
 │   └── Monthly Report - Feb 2026.md
-├── Fintech - Acme Payments/          ← One folder per company
+├── Deal Flow/                        ← Incoming pitches for evaluation
+│   ├── README.md
+│   ├── Fintech - NovaPay/
+│   │   └── Series A Deck.pdf
+│   └── Climate - GreenGrid/
+│       └── Pitch Deck.pdf
+├── Fintech - Acme Payments/          ← One folder per portfolio company
 │   ├── Q3 FY26 Board Deck.pdf
 │   ├── MIS Dec 2025.xlsx
 │   └── ...

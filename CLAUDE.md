@@ -19,9 +19,16 @@ portfolio-tracker/
 │   ├── Red Flags & Follow-ups.html   ← Action items, warnings, promises to track
 │   ├── Promise Tracker.html          ← Accountability dashboard — tracks company commitments
 │   ├── Collaboration Opportunities.html ← Cross-portfolio synergies (externally shareable)
+│   ├── Deal Flow.html                ← Pitch evaluation & prioritization dashboard
 │   ├── Team Update - {Mon} {Year}.html ← Shareable update for the team
 │   ├── Running Summary.md             ← Detailed per-company analysis
 │   └── Monthly Report - {Mon} {Year}.md ← End-of-month compilation
+├── Deal Flow/                         ← Incoming pitches for evaluation
+│   ├── README.md                      ← Instructions for the team
+│   ├── {Sector} - {Company X}/        ← One folder per pitch
+│   │   └── Pitch Deck.pdf
+│   └── {Sector} - {Company Y}/
+│       └── Series A Deck.pdf
 ├── {Sector} - {Company A}/            ← One folder per portfolio company
 │   ├── Q3 FY26 Update.pdf
 │   ├── MIS Dec 2025.xlsx
@@ -71,13 +78,15 @@ Process ONE company per cycle. Read all files for that company, write the summar
 ### Don't over-read files
 Read PDF/documents one page-range at a time (max 5-10 pages per call). For Excel files, read sheet names first, then prioritize P&L, KPIs, and summary sheets before diving into detail tabs.
 
-### Update five files after each company
-After processing each company, update ALL FIVE outputs:
+### Update five files after each portfolio company
+After processing each **portfolio company**, update ALL FIVE outputs:
 1. `Running Summary.md` — append the detailed analysis
 2. `Portfolio Dashboard.html` — update that company's row
 3. `Red Flags & Follow-ups.html` — add any new flags
 4. `Promise Tracker.html` — add any new promises, verify previous promises if data available
 5. `Collaboration Opportunities.html` — add any cross-portfolio synergies identified
+
+**Note:** Pitch evaluations (Deal Flow) are different — they update only `Deal Flow.html`. Do not add pitches to the portfolio outputs above unless they have graduated to portfolio companies.
 
 ### Always end with a question
 After completing a company, ask the user which company to process next. Don't chain automatically.
@@ -95,6 +104,12 @@ After completing a company, ask the user which company to process next. Don't ch
 <!-- Format: - [x] Folder / Filename (processed DATE) -->
 
 _No files processed yet. Drop update files into company folders and run Claude._
+
+## Pitches Evaluated (Tracker)
+<!-- Claude updates this automatically as pitches are evaluated -->
+<!-- Format: - [x] Deal Flow / {Sector} - {Company} / Filename (evaluated DATE, score: XX, priority: High/Medium/Low/Pass) -->
+
+_No pitches evaluated yet. Drop pitch documents into Deal Flow/ subfolders and run Claude._
 
 ## Workflows
 
@@ -118,6 +133,20 @@ At end of each month, compile all updates into `Monthly Report - {Month} {Year}.
 - Portfolio-level summary (total revenue, key themes)
 - Per-company: financials, operations, key signals (good and bad), action items
 - Use the Dashboard for the overview and Red Flags for the action items
+
+### 4. Processing Incoming Pitches
+1. **Detect new pitches:** Run `bash detect_new_files.sh` — look for the "DEAL FLOW / PITCHES" section
+2. **Evaluate one pitch at a time.** Claude reads the pitch documents, scores on the 100-point rubric, writes the evaluation following the Pitch Evaluation Template below
+3. **After each pitch, Claude updates one output:** `Deal Flow.html` — add the pitch card to the appropriate priority tier, update the comparison table and sector distribution
+4. **After evaluating a pitch, ask which pitch to evaluate next.** Don't chain automatically.
+
+### 5. Graduating a Pitch to Portfolio
+When the team invests in a company that was previously evaluated as a pitch:
+1. **Move the folder** from `Deal Flow/{Sector} - {Company}/` to the portfolio root: `{Sector} - {Company}/`
+2. **Add the company** to the Portfolio Companies table in CLAUDE.md
+3. **Mark the pitch as "Invested"** in `Deal Flow.html` — add the Invested badge to the pitch card
+4. **Process the company** through the normal portfolio workflow (Workflow 1) — the pitch deck can serve as the first file
+5. **The pitch evaluation stays** in `Deal Flow.html` as a record — it doesn't get deleted
 
 ## Standard Summary Template
 Every company summary in Running Summary MUST follow this structure. Skip sections only if data is truly unavailable.
@@ -269,6 +298,124 @@ The Collaboration Opportunities dashboard is **externally shareable** — founde
 - Frame synergies as value-creation opportunities, not obligations
 - Be specific enough to be actionable but not so detailed that it exposes sensitive data
 
+## Deal Flow / Pitch Evaluation
+
+### Processing Rules
+- **One pitch at a time.** Evaluate one pitch per cycle, update `Deal Flow.html`, then ask which pitch to evaluate next.
+- **Quick evaluation, not deep diligence.** Pitches get a structured assessment on the 100-point rubric — not the deep financial extraction that portfolio companies receive.
+- **Pitch files live in `Deal Flow/` subfolders.** Folder naming follows the same convention: `{Sector} - {Company Name}/`
+- **Only update `Deal Flow.html`.** Do NOT add pitches to Running Summary, Portfolio Dashboard, Red Flags, Promise Tracker, or Collaboration Opportunities. Those are for portfolio companies only.
+- **Don't over-read pitch files.** Read decks one page-range at a time (max 5-10 pages per call). For financial models, read sheet names first, then prioritize summary sheets.
+
+### Scoring Framework (100 points)
+
+| Dimension | Weight | What It Assesses |
+|-----------|--------|-----------------|
+| Team | 25 | Founder-market fit, domain expertise, team completeness, relevant experience |
+| Market | 20 | TAM/SAM size, growth rate, market timing, regulatory environment |
+| Traction | 20 | Revenue, users, retention, PMF signals, growth trajectory |
+| Product / Differentiation | 15 | Moat, defensibility, switching costs, technical advantage |
+| Business Model | 10 | Unit economics, margins, scalability, path to profitability |
+| Deal Terms | 10 | Valuation reasonableness, round size, use of proceeds clarity |
+
+**Scoring rules:**
+- Score each dimension out of its weight (e.g., Team out of 25). Sum for total score.
+- **Missing information pulls scores DOWN.** A pitch that omits unit economics cannot score well on Business Model. A pitch with no retention data scores low on Traction.
+- Provide a brief rationale for each dimension's score.
+
+### Priority Tiers
+
+| Score Range | Priority | Meaning | Color |
+|-------------|----------|---------|-------|
+| 75–100 | High | Take a meeting — compelling pitch | Green |
+| 55–74 | Medium (Needs Research) | Promising but incomplete — request more info | Blue |
+| 35–54 | Low (Watch) | Not compelling right now — keep on radar | Amber |
+| 0–34 | Pass | Clear misfit — don't pursue | Gray |
+
+### Missing Information Checklist
+Flag as missing if the pitch does not include:
+- [ ] Unit economics (CAC, LTV, payback period)
+- [ ] Cohort retention or churn data
+- [ ] Honest competitive landscape (not just "no competition")
+- [ ] Gross margin breakdown
+- [ ] Burn rate and runway
+- [ ] Customer concentration (top customer % of revenue)
+- [ ] Go-to-market specifics (not just "we'll sell to enterprises")
+- [ ] Cap table / existing investors
+- [ ] Use of proceeds breakdown
+- [ ] Team backgrounds with relevant domain experience
+
+### Pitch Evaluation Template
+Every pitch evaluation MUST follow this structure:
+
+```markdown
+## {Company Name} — Pitch Evaluation
+
+**Evaluated:** {date}
+**Source files:** {list of files read}
+**Company:** {one-line description of what they do}
+**Sector:** {sector}
+**Stage:** {Pre-seed / Seed / Series A / Series B / etc.}
+**Ask:** {round size and instrument}
+**Source/Referral:** {who referred or where the pitch came from, if known}
+
+### Priority: {High / Medium / Low / Pass} — Score: {X}/100
+
+### Score Breakdown
+
+| Dimension | Score | Max | Rationale |
+|-----------|-------|-----|-----------|
+| Team | {X} | 25 | {brief rationale} |
+| Market | {X} | 20 | {brief rationale} |
+| Traction | {X} | 20 | {brief rationale} |
+| Product / Differentiation | {X} | 15 | {brief rationale} |
+| Business Model | {X} | 10 | {brief rationale} |
+| Deal Terms | {X} | 10 | {brief rationale} |
+| **Total** | **{X}** | **100** | |
+
+### Key Strengths
+Numbered list. Be specific — reference actual data from the pitch.
+
+### Key Concerns
+Numbered list. Be direct — flag real risks and weaknesses.
+
+### Missing Information
+Numbered list. What would you need to see before making a decision?
+
+### Questions for Founders
+At least 5 specific questions. Reference actual claims from the pitch.
+Not generic — specific to this company's pitch.
+
+### Recommendation
+One paragraph. Clear verdict + suggested next steps.
+E.g., "Schedule a meeting and request financial model" or "Pass — market too small for fund thesis."
+```
+
+### Pitch Evaluation Checklist
+Before marking a pitch as evaluated, verify:
+- [ ] All pitch documents read (deck, one-pager, financial model if present)
+- [ ] All 6 scoring dimensions assessed with rationale
+- [ ] Total score computed correctly
+- [ ] Priority tier assigned based on score
+- [ ] At least 3 key strengths identified
+- [ ] At least 3 key concerns identified
+- [ ] Missing information flagged (use the checklist above)
+- [ ] At least 5 specific questions for founders written
+- [ ] Recommendation paragraph with clear verdict and next steps
+- [ ] `Deal Flow.html` updated: pitch card added to correct priority tier
+- [ ] `Deal Flow.html` updated: comparison table updated
+- [ ] `Deal Flow.html` updated: sector distribution updated
+- [ ] `Deal Flow.html` updated: summary bar counts updated
+- [ ] Pitches Evaluated tracker in CLAUDE.md updated
+
+### Graduation Process
+When a pitch becomes an investment:
+1. Move the company folder from `Deal Flow/` to the portfolio root
+2. Add to the Portfolio Companies table in CLAUDE.md
+3. Add the "Invested" badge to the pitch card in `Deal Flow.html`
+4. Process through the normal portfolio workflow (the pitch deck serves as the first file)
+5. The pitch evaluation stays in `Deal Flow.html` as a historical record
+
 ## Analyst Principles
 - **Be direct.** Flag problems clearly — don't sugarcoat bad numbers.
 - **Trends over absolutes.** Always compare current period to prior periods.
@@ -278,6 +425,8 @@ The Collaboration Opportunities dashboard is **externally shareable** — founde
 - **Think like an investor.** What would you ask if your money was in this company?
 - **Find connections.** Actively look for synergies across portfolio companies. A well-connected portfolio creates more value than the sum of its parts.
 - **Consistent format.** Every summary follows the same template so they're easy to scan across companies.
+- **Pitches vs. portfolio — different depth.** Portfolio companies get deep financial extraction. Pitches get a quick structured evaluation. Don't over-analyze a pitch deck the way you would a quarterly MIS.
+- **Missing info is a signal.** In pitch evaluation, what a company omits tells you as much as what they include. A deck with no unit economics, no retention data, and no competitive analysis is a red flag regardless of the story.
 
 ## HTML Output Guidelines
 When generating or updating HTML files (Dashboard, Red Flags, Team Update):
@@ -288,6 +437,7 @@ When generating or updating HTML files (Dashboard, Red Flags, Team Update):
 - Include a "Last updated" date in the header of every HTML file
 - **Promise Tracker:** Use status badges (Pending=amber, On Track=light-green, Delivered=green, Partially Delivered=orange, Missed=red, Expired=gray) and category badges (Financial, Product, Operational, Fundraising). Group by urgency: overdue first, then due this quarter, then active, then resolved.
 - **Collaboration Opportunities:** Keep tone constructive and externally shareable — no confidential financials. Use impact badges (High=blue, Medium=amber, Low=gray). Include a synergy matrix showing opportunity counts between company pairs.
+- **Deal Flow:** Use pitch cards (not table rows) — pitches need space for qualitative text. Each card has a 2x2 detail grid: strengths (green), concerns (red), missing info (amber), questions (neutral). Left border colored by priority tier. Priority badges: High=green, Medium=blue, Low=amber, Pass=gray. Graduated pitches get an Invested badge (green, bold). Include a ranked comparison table and sector distribution cards. Score color coding: 75-100=green, 55-74=blue, 35-54=amber, 0-34=gray.
 
 ## Notes for Excel Files
 The Claude Read tool cannot handle .xlsx files directly. When encountering Excel files:

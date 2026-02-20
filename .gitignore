@@ -25,6 +25,17 @@ Claude Summary/Running Summary.md
 Claude Summary/Monthly Report - [JFMASOND]*.md
 Claude Summary/Team Update - [JFMASOND]*.html
 
+# Deal Flow pitch files (defense in depth — global rules above already
+# block *.pdf etc., but explicit rules make intent clear)
+Deal Flow/**/*.pdf
+Deal Flow/**/*.xlsx
+Deal Flow/**/*.xls
+Deal Flow/**/*.pptx
+Deal Flow/**/*.ppt
+Deal Flow/**/*.csv
+Deal Flow/**/*.doc
+Deal Flow/**/*.docx
+
 # OS files
 .DS_Store
 Thumbs.db

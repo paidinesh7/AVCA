@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deal Flow — Pitch Evaluation &amp; Prioritization</title>
+<style>
+  :root {
+    --green: #16a34a; --green-bg: #f0fdf4; --green-border: #86efac;
+    --amber: #d97706; --amber-bg: #fffbeb; --amber-border: #fcd34d;
+    --red: #dc2626; --red-bg: #fef2f2; --red-border: #fca5a5;
+    --blue: #2563eb; --blue-bg: #eff6ff; --blue-border: #93c5fd;
+    --purple: #7c3aed; --purple-bg: #faf5ff; --purple-border: #c4b5fd;
+    --gray: #6b7280; --gray-bg: #f9fafb; --gray-border: #d1d5db;
+    --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+    --gray-500: #6b7280; --gray-700: #374151; --gray-900: #111827;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--gray-50); color: var(--gray-900); line-height: 1.5; padding: 2rem;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--gray-900);
+  }
+  h1 { font-size: 1.75rem; font-weight: 700; }
+  .subtitle { color: var(--gray-500); font-size: 0.875rem; }
+
+  .summary-bar {
+    display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  .summary-card {
+    background: white; border-radius: 8px; padding: 1rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-width: 140px;
+  }
+  .summary-card .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-500); }
+  .summary-card .value { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
+
+  .section { margin-bottom: 2.5rem; }
+  .section-header {
+    font-size: 1.05rem; font-weight: 600; margin-bottom: 0.75rem;
+    padding: 0.5rem 0.75rem; border-radius: 6px;
+  }
+  .section-high .section-header { background: var(--green-bg); color: var(--green); border-left: 4px solid var(--green); }
+  .section-medium .section-header { background: var(--blue-bg); color: var(--blue); border-left: 4px solid var(--blue); }
+  .section-low .section-header { background: var(--amber-bg); color: var(--amber); border-left: 4px solid var(--amber); }
+  .section-pass .section-header { background: var(--gray-bg); color: var(--gray); border-left: 4px solid var(--gray); }
+  .section-comparison .section-header { background: var(--purple-bg); color: var(--purple); border-left: 4px solid var(--purple); }
+  .section-sectors .section-header { background: var(--gray-100); color: var(--gray-700); border-left: 4px solid var(--gray-500); }
+
+  /* Pitch cards */
+  .pitch-cards { display: flex; flex-direction: column; gap: 1rem; }
+  .pitch-card {
+    background: white; border-radius: 8px; padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid var(--gray-200);
+  }
+  .pitch-card.priority-high { border-left-color: var(--green); }
+  .pitch-card.priority-medium { border-left-color: var(--blue); }
+  .pitch-card.priority-low { border-left-color: var(--amber); }
+  .pitch-card.priority-pass { border-left-color: var(--gray); }
+
+  .pitch-card-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+  .pitch-company { font-size: 1.1rem; font-weight: 700; }
+  .pitch-oneliner { font-size: 0.85rem; color: var(--gray-500); margin-top: 0.15rem; }
+  .pitch-score {
+    font-size: 1.5rem; font-weight: 700; min-width: 3rem; text-align: center;
+    padding: 0.25rem 0.5rem; border-radius: 6px;
+  }
+  .pitch-score.score-high { background: var(--green-bg); color: var(--green); }
+  .pitch-score.score-medium { background: var(--blue-bg); color: var(--blue); }
+  .pitch-score.score-low { background: var(--amber-bg); color: var(--amber); }
+  .pitch-score.score-pass { background: var(--gray-bg); color: var(--gray); }
+
+  .pitch-meta {
+    display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.75rem;
+    color: var(--gray-500); margin-bottom: 0.75rem;
+  }
+  .pitch-meta span { white-space: nowrap; }
+
+  .badge {
+    display: inline-block; font-size: 0.65rem; padding: 0.15rem 0.45rem;
+    border-radius: 3px; font-weight: 500;
+  }
+  .priority-badge-high { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .priority-badge-medium { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+  .priority-badge-low { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .priority-badge-pass { background: var(--gray-bg); color: var(--gray); border: 1px solid var(--gray-border); }
+  .priority-badge-invested { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); font-weight: 700; }
+
+  .sector-badge {
+    display: inline-block; font-size: 0.6rem; padding: 0.1rem 0.4rem;
+    border-radius: 3px; background: var(--blue-bg); color: var(--blue);
+    font-weight: 500; text-transform: uppercase;
+  }
+
+  .detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+  }
+  .detail-block {
+    border-radius: 6px; padding: 0.75rem; font-size: 0.8rem;
+  }
+  .detail-block h4 {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+  .detail-block ol, .detail-block ul { padding-left: 1.2rem; }
+  .detail-block li { margin-bottom: 0.2rem; }
+  .detail-strengths { background: var(--green-bg); }
+  .detail-strengths h4 { color: var(--green); }
+  .detail-concerns { background: var(--red-bg); }
+  .detail-concerns h4 { color: var(--red); }
+  .detail-missing { background: var(--amber-bg); }
+  .detail-missing h4 { color: var(--amber); }
+  .detail-questions { background: var(--gray-100); }
+  .detail-questions h4 { color: var(--gray-700); }
+
+  .recommendation {
+    margin-top: 0.75rem; padding: 0.75rem; background: var(--gray-100);
+    border-radius: 6px; font-size: 0.85rem;
+  }
+  .recommendation strong { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-500); }
+
+  /* Comparison table */
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.8rem;
+    background: white; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  th {
+    background: var(--gray-900); color: white; padding: 0.55rem 0.75rem;
+    text-align: left; font-weight: 600; font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--gray-50); }
+  .company { font-weight: 600; white-space: nowrap; }
+  td.num { text-align: center; }
+
+  /* Sector distribution */
+  .sector-grid {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+  }
+  .sector-card {
+    background: white; border-radius: 8px; padding: 1rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-width: 120px; text-align: center;
+  }
+  .sector-card .sector-name {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--blue); font-weight: 600;
+  }
+  .sector-card .sector-count { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
+
+  .empty-state {
+    text-align: center; padding: 4rem 2rem; color: var(--gray-500);
+    background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .empty-state h2 { font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--gray-700); }
+  .empty-state p { font-size: 0.9rem; }
+
+  .footer {
+    margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);
+    font-size: 0.75rem; color: var(--gray-500);
+  }
+
+  @media print {
+    body { padding: 0.5rem; }
+    .pitch-card { break-inside: avoid; }
+    table { font-size: 0.7rem; }
+    .summary-bar { gap: 0.75rem; }
+    .detail-grid { gap: 0.5rem; }
+  }
+
+  @media (max-width: 640px) {
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Deal Flow &mdash; Pitch Evaluation &amp; Prioritization</h1>
+    <div class="subtitle">Incoming Pitch Assessment Dashboard</div>
+  </div>
+  <div class="subtitle">Last updated: &mdash;</div>
+</div>
+
+<div class="summary-bar">
+  <div class="summary-card">
+    <div class="label">Pitches Reviewed</div>
+    <div class="value">0</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">High Priority</div>
+    <div class="value">&mdash;</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Needs Research</div>
+    <div class="value">&mdash;</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Pass</div>
+    <div class="value">&mdash;</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Sectors</div>
+    <div class="value">&mdash;</div>
+  </div>
+</div>
+
+<!-- PITCH SECTIONS — Claude populates these as pitches are evaluated -->
+
+<!-- Section 1: High Priority (75-100) -->
+<div class="section section-high">
+  <div class="section-header">High Priority &mdash; Take a Meeting (75&ndash;100)</div>
+  <div class="pitch-cards">
+    <!-- Claude adds pitch cards here -->
+  </div>
+</div>
+
+<!-- Section 2: Needs Research (55-74) -->
+<div class="section section-medium">
+  <div class="section-header">Needs Research &mdash; Promising but Incomplete (55&ndash;74)</div>
+  <div class="pitch-cards">
+    <!-- Claude adds pitch cards here -->
+  </div>
+</div>
+
+<!-- Section 3: Low Priority / Watch (35-54) -->
+<div class="section section-low">
+  <div class="section-header">Low Priority / Watch &mdash; Not Compelling Now (35&ndash;54)</div>
+  <div class="pitch-cards">
+    <!-- Claude adds pitch cards here -->
+  </div>
+</div>
+
+<!-- Section 4: Pass (0-34) -->
+<div class="section section-pass">
+  <div class="section-header">Pass &mdash; Clear Misfit (0&ndash;34)</div>
+  <div class="pitch-cards">
+    <!-- Claude adds pitch cards here -->
+  </div>
+</div>
+
+<!-- Section 5: Comparison Table -->
+<div class="section section-comparison">
+  <div class="section-header">Comparison Table &mdash; All Pitches Ranked</div>
+  <!-- Claude replaces this with a ranked comparison table -->
+</div>
+
+<!-- Section 6: Sector Distribution -->
+<div class="section section-sectors">
+  <div class="section-header">Sector Distribution</div>
+  <div class="sector-grid">
+    <!-- Claude adds sector cards here -->
+  </div>
+</div>
+
+<!-- Empty state — shown when no pitches have been evaluated yet -->
+<div class="empty-state">
+  <h2>No pitches evaluated yet</h2>
+  <p>Drop pitch documents into subfolders within <code>Deal Flow/</code> and run Claude to evaluate them.</p>
+  <p style="margin-top: 0.5rem; font-size: 0.8rem;">Each pitch is scored on a 100-point rubric across Team, Market, Traction, Product, Business Model, and Deal Terms.</p>
+</div>
+
+<!--
+TEMPLATE REFERENCE — Claude uses these structures when populating sections:
+
+Pitch card:
+<div class="pitch-card priority-high">
+  <div class="pitch-card-header">
+    <div>
+      <div class="pitch-company">Company Name <span class="sector-badge">Fintech</span></div>
+      <div class="pitch-oneliner">One-line description of what they do</div>
+    </div>
+    <div class="pitch-score score-high">82</div>
+  </div>
+  <div class="pitch-meta">
+    <span>Stage: Series A</span>
+    <span>Ask: $5M</span>
+    <span>Source: Partner referral</span>
+    <span>Reviewed: 2026-02-20</span>
+    <span><span class="badge priority-badge-high">High Priority</span></span>
+  </div>
+  <div class="detail-grid">
+    <div class="detail-block detail-strengths">
+      <h4>Key Strengths</h4>
+      <ol>
+        <li>Strong founder-market fit — 10 years in payments</li>
+        <li>3x revenue growth QoQ with healthy unit economics</li>
+        <li>Clear moat via proprietary data advantage</li>
+      </ol>
+    </div>
+    <div class="detail-block detail-concerns">
+      <h4>Key Concerns</h4>
+      <ol>
+        <li>Single-channel customer acquisition risk</li>
+        <li>No clear path to profitability presented</li>
+      </ol>
+    </div>
+    <div class="detail-block detail-missing">
+      <h4>Missing Information</h4>
+      <ol>
+        <li>Unit economics breakdown (CAC, LTV, payback)</li>
+        <li>Cohort retention data</li>
+      </ol>
+    </div>
+    <div class="detail-block detail-questions">
+      <h4>Questions for Founders</h4>
+      <ol>
+        <li>What is your CAC by channel and how has it trended?</li>
+        <li>What does cohort retention look like at 6 and 12 months?</li>
+        <li>Who are the top 3 competitors and why will you win?</li>
+        <li>What is the gross margin breakdown by product line?</li>
+        <li>How does this round get you to the next milestone?</li>
+      </ol>
+    </div>
+  </div>
+  <div class="recommendation">
+    <strong>Recommendation</strong>
+    <p>Strong team with clear traction in a large market. The missing unit economics are a gap that needs filling before committing. Recommend scheduling a meeting and requesting a detailed financial model with cohort data before the next discussion.</p>
+  </div>
+</div>
+
+Pitch card with Invested badge (graduated to portfolio):
+<div class="pitch-card priority-high">
+  <div class="pitch-card-header">
+    <div>
+      <div class="pitch-company">Company Name <span class="sector-badge">Fintech</span> <span class="badge priority-badge-invested">Invested</span></div>
+      ...
+    </div>
+    ...
+  </div>
+  ...
+</div>
+
+Priority badge classes: priority-badge-high, priority-badge-medium, priority-badge-low, priority-badge-pass, priority-badge-invested
+Score color classes: score-high (75-100), score-medium (55-74), score-low (35-54), score-pass (0-34)
+Card border classes: priority-high, priority-medium, priority-low, priority-pass
+
+Comparison table:
+<table>
+  <thead>
+    <tr><th>#</th><th>Company</th><th>Sector</th><th>Stage</th><th>Ask</th><th>Score</th><th>Priority</th><th>Top Strength</th><th>Top Concern</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="num">1</td>
+      <td class="company">Company Name</td>
+      <td><span class="sector-badge">Fintech</span></td>
+      <td>Series A</td>
+      <td>$5M</td>
+      <td class="num"><strong>82</strong></td>
+      <td><span class="badge priority-badge-high">High</span></td>
+      <td>Strong founder-market fit</td>
+      <td>Missing unit economics</td>
+    </tr>
+  </tbody>
+</table>
+
+Sector distribution card:
+<div class="sector-card">
+  <div class="sector-name">Fintech</div>
+  <div class="sector-count">3</div>
+</div>
+-->
+
+<div class="footer">
+  Deal Flow &mdash; Pitch Evaluation &amp; Prioritization &middot; Generated by Claude &middot; Updated each evaluation cycle
+</div>
+
+</body>
+</html>

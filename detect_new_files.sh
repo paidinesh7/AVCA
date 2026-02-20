@@ -1,6 +1,7 @@
 #!/bin/bash
 # Portfolio Tracker - New File Detection Script
 # Compares files on disk against the processed tracker in CLAUDE.md
+# Scans both portfolio company folders and Deal Flow pitch folders
 # Usage: bash detect_new_files.sh
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -17,33 +18,30 @@ if [ ! -f "$CLAUDE_MD" ]; then
     exit 1
 fi
 
-new_count=0
+# ---- PASS 1: Portfolio company files ----
+portfolio_count=0
 
-# Find all files in company folders (skip Claude Summary and hidden dirs)
 while IFS= read -r filepath; do
-    # Get relative path from root
     relpath="${filepath#$ROOT/}"
     filename=$(basename "$filepath")
 
-    # Check if this file is already in the tracker
     if grep -qF "$filename" "$CLAUDE_MD" 2>/dev/null; then
         : # Already tracked
     else
-        if [ $new_count -eq 0 ]; then
-            echo "NEW FILES FOUND:"
+        if [ $portfolio_count -eq 0 ]; then
+            echo "PORTFOLIO UPDATES:"
             echo "-----------------------------------"
         fi
-        new_count=$((new_count + 1))
-        # Get file size
+        portfolio_count=$((portfolio_count + 1))
         size=$(du -h "$filepath" | cut -f1)
-        # Get modification date
         moddate=$(date -r "$filepath" "+%Y-%m-%d %H:%M" 2>/dev/null || stat -c "%y" "$filepath" 2>/dev/null | cut -d. -f1)
-        echo "  [$new_count] $relpath"
+        echo "  [$portfolio_count] $relpath"
         echo "      Size: $size | Modified: $moddate"
         echo ""
     fi
 done < <(find "$ROOT" -type f \
     -not -path "*/Claude Summary/*" \
+    -not -path "*/Deal Flow/*" \
     -not -path "*/.claude/*" \
     -not -path "*/.git/*" \
     -not -name "CLAUDE.md" \
@@ -53,14 +51,66 @@ done < <(find "$ROOT" -type f \
     -not -name ".*" \
     | sort)
 
-if [ $new_count -eq 0 ]; then
-    echo "All files are tracked. No new updates found."
+if [ $portfolio_count -eq 0 ]; then
+    echo "PORTFOLIO UPDATES: None — all files tracked."
+fi
+
+echo ""
+
+# ---- PASS 2: Deal Flow pitch files ----
+dealflow_count=0
+
+if [ -d "$ROOT/Deal Flow" ]; then
+    while IFS= read -r filepath; do
+        relpath="${filepath#$ROOT/}"
+        filename=$(basename "$filepath")
+
+        if grep -qF "$filename" "$CLAUDE_MD" 2>/dev/null; then
+            : # Already tracked
+        else
+            if [ $dealflow_count -eq 0 ]; then
+                echo "DEAL FLOW / PITCHES:"
+                echo "-----------------------------------"
+            fi
+            dealflow_count=$((dealflow_count + 1))
+            size=$(du -h "$filepath" | cut -f1)
+            moddate=$(date -r "$filepath" "+%Y-%m-%d %H:%M" 2>/dev/null || stat -c "%y" "$filepath" 2>/dev/null | cut -d. -f1)
+            echo "  [$dealflow_count] $relpath"
+            echo "      Size: $size | Modified: $moddate"
+            echo ""
+        fi
+    done < <(find "$ROOT/Deal Flow" -type f \
+        -not -name "README.md" \
+        -not -name ".*" \
+        | sort)
+
+    if [ $dealflow_count -eq 0 ]; then
+        echo "DEAL FLOW / PITCHES: None — all pitches tracked."
+    fi
 else
-    echo "-----------------------------------"
-    echo "Total new files: $new_count"
+    echo "DEAL FLOW / PITCHES: Deal Flow/ directory not found. Create it to start evaluating pitches."
+fi
+
+echo ""
+
+# ---- Summary ----
+total=$((portfolio_count + dealflow_count))
+
+if [ $total -eq 0 ]; then
+    echo "==================================="
+    echo "All files are tracked. No new updates or pitches found."
+else
+    echo "==================================="
+    echo "Total new files: $total (portfolio: $portfolio_count, pitches: $dealflow_count)"
     echo ""
-    echo "To process, start a Claude Code session and say:"
-    echo "  'Process the new updates'"
+    if [ $portfolio_count -gt 0 ]; then
+        echo "To process portfolio updates, start Claude and say:"
+        echo "  'Process the new updates'"
+    fi
+    if [ $dealflow_count -gt 0 ]; then
+        echo "To evaluate pitches, start Claude and say:"
+        echo "  'Evaluate the new pitches'"
+    fi
 fi
 
 echo ""
