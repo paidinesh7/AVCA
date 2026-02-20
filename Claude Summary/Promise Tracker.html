@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promise Tracker</title>
+<style>
+  :root {
+    --red: #dc2626; --red-bg: #fef2f2; --red-border: #fca5a5;
+    --amber: #d97706; --amber-bg: #fffbeb; --amber-border: #fcd34d;
+    --green: #16a34a; --green-bg: #f0fdf4; --green-border: #86efac;
+    --light-green: #22c55e; --light-green-bg: #f0fdf4; --light-green-border: #bbf7d0;
+    --orange: #ea580c; --orange-bg: #fff7ed; --orange-border: #fdba74;
+    --blue: #2563eb; --blue-bg: #eff6ff; --blue-border: #93c5fd;
+    --gray: #6b7280; --gray-bg: #f9fafb; --gray-border: #d1d5db;
+    --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+    --gray-500: #6b7280; --gray-700: #374151; --gray-900: #111827;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--gray-50); color: var(--gray-900); line-height: 1.5; padding: 2rem;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--gray-900);
+  }
+  h1 { font-size: 1.75rem; font-weight: 700; }
+  .subtitle { color: var(--gray-500); font-size: 0.875rem; }
+
+  .summary-bar {
+    display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  .summary-card {
+    background: white; border-radius: 8px; padding: 1rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-width: 160px;
+  }
+  .summary-card .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-500); }
+  .summary-card .value { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
+
+  .section { margin-bottom: 2.5rem; }
+  .section-header {
+    font-size: 1.05rem; font-weight: 600; margin-bottom: 0.75rem;
+    padding: 0.5rem 0.75rem; border-radius: 6px;
+  }
+  .section-overdue .section-header { background: var(--red-bg); color: var(--red); border-left: 4px solid var(--red); }
+  .section-due .section-header { background: var(--amber-bg); color: var(--amber); border-left: 4px solid var(--amber); }
+  .section-active .section-header { background: var(--blue-bg); color: var(--blue); border-left: 4px solid var(--blue); }
+  .section-delivered .section-header { background: var(--green-bg); color: var(--green); border-left: 4px solid var(--green); }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.8rem;
+    background: white; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  th {
+    background: var(--gray-900); color: white; padding: 0.55rem 0.75rem;
+    text-align: left; font-weight: 600; font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--gray-50); }
+
+  .company { font-weight: 600; white-space: nowrap; }
+
+  .badge {
+    display: inline-block; font-size: 0.65rem; padding: 0.15rem 0.45rem;
+    border-radius: 3px; font-weight: 500;
+  }
+  .status-pending { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .status-on-track { background: var(--light-green-bg); color: var(--light-green); border: 1px solid var(--light-green-border); }
+  .status-delivered { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .status-partial { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-border); }
+  .status-missed { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .status-expired { background: var(--gray-bg); color: var(--gray); border: 1px solid var(--gray-border); }
+
+  .cat-financial { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+  .cat-product { background: #faf5ff; color: #7c3aed; border: 1px solid #c4b5fd; }
+  .cat-operational { background: #f0fdfa; color: #0d9488; border: 1px solid #99f6e4; }
+  .cat-fundraising { background: #fdf2f8; color: #db2777; border: 1px solid #f9a8d4; }
+
+  .scorecard { margin-top: 0.5rem; }
+  .scorecard td.num { text-align: center; }
+  .delivery-good { color: var(--green); font-weight: 600; }
+  .delivery-ok { color: var(--amber); font-weight: 600; }
+  .delivery-bad { color: var(--red); font-weight: 600; }
+
+  .empty-state {
+    text-align: center; padding: 4rem 2rem; color: var(--gray-500);
+    background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .empty-state h2 { font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--gray-700); }
+  .empty-state p { font-size: 0.9rem; }
+
+  .footer {
+    margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);
+    font-size: 0.75rem; color: var(--gray-500);
+  }
+
+  @media print {
+    body { padding: 0.5rem; }
+    table { font-size: 0.7rem; }
+    .summary-bar { gap: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Promise Tracker</h1>
+    <div class="subtitle">Portfolio Accountability Dashboard</div>
+  </div>
+  <div class="subtitle">Last updated: &mdash;</div>
+</div>
+
+<div class="summary-bar">
+  <div class="summary-card">
+    <div class="label">Total Promises</div>
+    <div class="value">0</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Delivered</div>
+    <div class="value">&mdash;</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Missed</div>
+    <div class="value">&mdash;</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Pending Review</div>
+    <div class="value">&mdash;</div>
+  </div>
+</div>
+
+<!-- SECTIONS: Claude populates these as companies are processed -->
+
+<!-- Section 1: Overdue & Missed -->
+<div class="section section-overdue">
+  <div class="section-header">Overdue &amp; Missed Promises</div>
+  <!-- Claude adds a table here when promises are overdue/missed -->
+</div>
+
+<!-- Section 2: Due This Quarter -->
+<div class="section section-due">
+  <div class="section-header">Due This Quarter</div>
+  <!-- Claude adds a table here for promises due in the current quarter -->
+</div>
+
+<!-- Section 3: Active Promises -->
+<div class="section section-active">
+  <div class="section-header">Active Promises</div>
+  <!-- Claude adds a table here, grouped by company, for all pending/on-track promises -->
+</div>
+
+<!-- Section 4: Delivered & Resolved -->
+<div class="section section-delivered">
+  <div class="section-header">Delivered &amp; Resolved</div>
+  <!-- Claude adds a table here for completed promises -->
+</div>
+
+<!-- Section 5: Company Scorecard -->
+<div class="section">
+  <div class="section-header" style="background: var(--gray-100); color: var(--gray-700); border-left: 4px solid var(--gray-500);">Company Scorecard</div>
+  <!-- Claude replaces this with a scorecard table:
+       Columns: Company | Total | Delivered | On Track | Missed | Delivery Rate %
+  -->
+</div>
+
+<!-- Empty state — shown when no promises have been tracked yet -->
+<div class="empty-state">
+  <h2>No promises tracked yet</h2>
+  <p>As company updates are processed, forward-looking commitments will be extracted and tracked here.</p>
+  <p style="margin-top: 0.5rem; font-size: 0.8rem;">Promises include revenue targets, product launches, hiring plans, fundraising timelines, and operational milestones.</p>
+</div>
+
+<!--
+TEMPLATE REFERENCE — Claude uses these structures when populating sections:
+
+Overdue/Missed & Due This Quarter table:
+<table>
+  <thead><tr><th>Company</th><th>Promise</th><th>Category</th><th>Target Date</th><th>Status</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="company">Company Name</td>
+      <td>What they committed to</td>
+      <td><span class="badge cat-financial">Financial</span></td>
+      <td>Q3 FY26</td>
+      <td><span class="badge status-missed">Missed</span></td>
+      <td>Q2 Update, Jan 2026</td>
+    </tr>
+  </tbody>
+</table>
+
+Active Promises table:
+<table>
+  <thead><tr><th>Company</th><th>Promise</th><th>Category</th><th>Target Date</th><th>Status</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="company">Company Name</td>
+      <td>What they committed to</td>
+      <td><span class="badge cat-product">Product</span></td>
+      <td>Q4 FY26</td>
+      <td><span class="badge status-pending">Pending</span></td>
+      <td>Q3 Update, Feb 2026</td>
+    </tr>
+  </tbody>
+</table>
+
+Delivered & Resolved table:
+<table>
+  <thead><tr><th>Company</th><th>Promise</th><th>Category</th><th>Delivered</th><th>Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="company">Company Name</td>
+      <td>What they committed to</td>
+      <td><span class="badge cat-operational">Operational</span></td>
+      <td>Q3 FY26</td>
+      <td><span class="badge status-delivered">Delivered</span></td>
+      <td>Confirmed in Q3 MIS</td>
+    </tr>
+  </tbody>
+</table>
+
+Company Scorecard table:
+<table class="scorecard">
+  <thead><tr><th>Company</th><th>Total</th><th>Delivered</th><th>On Track</th><th>Missed</th><th>Delivery Rate</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="company">Company Name</td>
+      <td class="num">5</td>
+      <td class="num">3</td>
+      <td class="num">1</td>
+      <td class="num">1</td>
+      <td class="num delivery-good">60%</td>
+    </tr>
+  </tbody>
+</table>
+Delivery Rate color coding: >=75% = delivery-good, 50-74% = delivery-ok, <50% = delivery-bad
+
+Status badges: status-pending, status-on-track, status-delivered, status-partial, status-missed, status-expired
+Category badges: cat-financial, cat-product, cat-operational, cat-fundraising
+-->
+
+<div class="footer">
+  Promise Tracker &middot; Generated by Claude &middot; Updated each processing cycle
+</div>
+
+</body>
+</html>

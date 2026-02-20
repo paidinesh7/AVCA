@@ -31,6 +31,8 @@ An AI-powered portfolio tracking system for investment teams. Drop company updat
 5. **Open the HTML outputs in your browser**
    - `Claude Summary/Portfolio Dashboard.html` — one-page portfolio view
    - `Claude Summary/Red Flags & Follow-ups.html` — action items and warnings
+   - `Claude Summary/Promise Tracker.html` — company accountability dashboard
+   - `Claude Summary/Collaboration Opportunities.html` — cross-portfolio synergies
    - `Claude Summary/Team Update - {Month} {Year}.html` — shareable team summary
 
 ## What You Get
@@ -40,6 +42,8 @@ An AI-powered portfolio tracking system for investment teams. Drop company updat
 | **Running Summary** | Markdown | Detailed per-company analysis with financials, metrics, signals |
 | **Portfolio Dashboard** | HTML | One-page view of all companies — health, revenue, burn, signals |
 | **Red Flags & Follow-ups** | HTML | Urgent items, financial warnings, positive signals, promises to track |
+| **Promise Tracker** | HTML | Accountability dashboard — tracks company commitments and delivery rates |
+| **Collaboration Opportunities** | HTML | Cross-portfolio synergies and value creation opportunities (externally shareable) |
 | **Team Update** | HTML | Shareable summary — one card per company, designed for team distribution |
 | **Monthly Report** | Markdown | End-of-month compilation for the investment team |
 
@@ -61,7 +65,7 @@ Run Claude → detects new files
         ↓
 Processes ONE company at a time
         ↓
-Updates 3 files: Running Summary + Dashboard + Red Flags
+Updates 5 files: Running Summary + Dashboard + Red Flags + Promise Tracker + Collaboration Opportunities
         ↓
 Asks which company to process next
         ↓
@@ -86,6 +90,8 @@ portfolio-tracker/
 ├── Claude Summary/                   ← All Claude-generated outputs
 │   ├── Portfolio Dashboard.html
 │   ├── Red Flags & Follow-ups.html
+│   ├── Promise Tracker.html
+│   ├── Collaboration Opportunities.html
 │   ├── Team Update - Feb 2026.html
 │   ├── Running Summary.md
 │   └── Monthly Report - Feb 2026.md

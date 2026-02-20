@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collaboration Opportunities</title>
+<style>
+  :root {
+    --red: #dc2626; --red-bg: #fef2f2; --red-border: #fca5a5;
+    --amber: #d97706; --amber-bg: #fffbeb; --amber-border: #fcd34d;
+    --green: #16a34a; --green-bg: #f0fdf4; --green-border: #86efac;
+    --blue: #2563eb; --blue-bg: #eff6ff; --blue-border: #93c5fd;
+    --gray: #6b7280; --gray-bg: #f9fafb; --gray-border: #d1d5db;
+    --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+    --gray-500: #6b7280; --gray-700: #374151; --gray-900: #111827;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--gray-50); color: var(--gray-900); line-height: 1.5; padding: 2rem;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--gray-900);
+  }
+  h1 { font-size: 1.75rem; font-weight: 700; }
+  .subtitle { color: var(--gray-500); font-size: 0.875rem; }
+
+  .summary-bar {
+    display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  .summary-card {
+    background: white; border-radius: 8px; padding: 1rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-width: 160px;
+  }
+  .summary-card .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-500); }
+  .summary-card .value { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
+
+  .section { margin-bottom: 2.5rem; }
+  .section-header {
+    font-size: 1.05rem; font-weight: 600; margin-bottom: 0.75rem;
+    padding: 0.5rem 0.75rem; border-radius: 6px;
+  }
+  .section-active .section-header { background: var(--green-bg); color: var(--green); border-left: 4px solid var(--green); }
+  .section-high .section-header { background: var(--amber-bg); color: var(--amber); border-left: 4px solid var(--amber); }
+  .section-all .section-header { background: var(--blue-bg); color: var(--blue); border-left: 4px solid var(--blue); }
+  .section-matrix .section-header { background: var(--gray-100); color: var(--gray-700); border-left: 4px solid var(--gray-500); }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.8rem;
+    background: white; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  th {
+    background: var(--gray-900); color: white; padding: 0.55rem 0.75rem;
+    text-align: left; font-weight: 600; font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--gray-50); }
+
+  .company { font-weight: 600; white-space: nowrap; }
+
+  .badge {
+    display: inline-block; font-size: 0.65rem; padding: 0.15rem 0.45rem;
+    border-radius: 3px; font-weight: 500;
+  }
+  .impact-high { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+  .impact-medium { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .impact-low { background: var(--gray-bg); color: var(--gray); border: 1px solid var(--gray-border); }
+
+  .status-identified { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+  .status-exploring { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .status-active { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .status-realized { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; font-weight: 600; }
+
+  .type-customer-supplier { background: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; }
+  .type-technology { background: #faf5ff; color: #7c3aed; border: 1px solid #c4b5fd; }
+  .type-shared-market { background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; }
+  .type-co-development { background: #f0fdfa; color: #0d9488; border: 1px solid #99f6e4; }
+  .type-cross-selling { background: #fdf2f8; color: #db2777; border: 1px solid #f9a8d4; }
+  .type-talent { background: #fefce8; color: #a16207; border: 1px solid #fde047; }
+
+  /* Synergy Matrix */
+  .matrix-table { font-size: 0.75rem; }
+  .matrix-table th { font-size: 0.65rem; padding: 0.4rem; text-align: center; }
+  .matrix-table td { text-align: center; padding: 0.4rem; }
+  .matrix-table td.has-opportunity { background: var(--blue-bg); color: var(--blue); font-weight: 600; }
+  .matrix-table td.self { background: var(--gray-200); }
+
+  /* Opportunity Type Cards */
+  .type-cards {
+    display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.75rem;
+  }
+  .type-card {
+    background: white; border-radius: 8px; padding: 0.75rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-width: 140px; text-align: center;
+  }
+  .type-card .type-label { font-size: 0.75rem; color: var(--gray-500); margin-bottom: 0.25rem; }
+  .type-card .type-count { font-size: 1.25rem; font-weight: 700; }
+
+  .empty-state {
+    text-align: center; padding: 4rem 2rem; color: var(--gray-500);
+    background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .empty-state h2 { font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--gray-700); }
+  .empty-state p { font-size: 0.9rem; }
+
+  .footer {
+    margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);
+    font-size: 0.75rem; color: var(--gray-500);
+  }
+
+  @media print {
+    body { padding: 0.5rem; }
+    table { font-size: 0.7rem; }
+    .summary-bar { gap: 0.75rem; }
+    .type-cards { gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Portfolio Collaboration Opportunities</h1>
+    <div class="subtitle">Cross-Portfolio Synergies &amp; Value Creation</div>
+  </div>
+  <div class="subtitle">Last updated: &mdash;</div>
+</div>
+
+<div class="summary-bar">
+  <div class="summary-card">
+    <div class="label">Total Opportunities</div>
+    <div class="value">0</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Active</div>
+    <div class="value">&mdash;</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">High-Impact</div>
+    <div class="value">&mdash;</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Realized</div>
+    <div class="value">&mdash;</div>
+  </div>
+</div>
+
+<!-- SECTIONS: Claude populates these as companies are processed -->
+
+<!-- Section 1: Active Collaborations -->
+<div class="section section-active">
+  <div class="section-header">Active Collaborations</div>
+  <!-- Claude adds a table here for opportunities being pursued or realized -->
+</div>
+
+<!-- Section 2: High-Potential Opportunities -->
+<div class="section section-high">
+  <div class="section-header">High-Potential Opportunities</div>
+  <!-- Claude adds a table here for high-impact identified opportunities -->
+</div>
+
+<!-- Section 3: All Opportunities -->
+<div class="section section-all">
+  <div class="section-header">All Opportunities</div>
+  <!-- Claude adds a full table here with all opportunities -->
+</div>
+
+<!-- Section 4: Portfolio Synergy Matrix -->
+<div class="section section-matrix">
+  <div class="section-header">Portfolio Synergy Matrix</div>
+  <!-- Claude adds an NxN grid here showing opportunity counts between company pairs -->
+</div>
+
+<!-- Section 5: Opportunity Types Breakdown -->
+<div class="section">
+  <div class="section-header" style="background: var(--blue-bg); color: var(--blue); border-left: 4px solid var(--blue);">Opportunity Types Breakdown</div>
+  <!-- Claude adds type cards here -->
+</div>
+
+<!-- Empty state — shown when no opportunities have been identified yet -->
+<div class="empty-state">
+  <h2>No collaboration opportunities identified yet</h2>
+  <p>As portfolio companies are analyzed, potential synergies and cross-company opportunities will appear here.</p>
+  <p style="margin-top: 0.5rem; font-size: 0.8rem;">Opportunities include customer-supplier fits, technology integrations, shared markets, co-development, cross-selling, and talent sharing.</p>
+</div>
+
+<!--
+TEMPLATE REFERENCE — Claude uses these structures when populating sections:
+
+Active Collaborations & High-Potential table:
+<table>
+  <thead><tr><th>Company A</th><th>Company B</th><th>Type</th><th>Description</th><th>Impact</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="company">Company A</td>
+      <td class="company">Company B</td>
+      <td><span class="badge type-customer-supplier">Customer-Supplier</span></td>
+      <td>Description of the synergy opportunity</td>
+      <td><span class="badge impact-high">High</span></td>
+      <td><span class="badge status-active">Active</span></td>
+    </tr>
+  </tbody>
+</table>
+
+All Opportunities table:
+<table>
+  <thead><tr><th>Company A</th><th>Company B</th><th>Type</th><th>Description</th><th>Impact</th><th>Status</th><th>Date Identified</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="company">Company A</td>
+      <td class="company">Company B</td>
+      <td><span class="badge type-technology">Technology</span></td>
+      <td>Description of the synergy opportunity</td>
+      <td><span class="badge impact-medium">Medium</span></td>
+      <td><span class="badge status-identified">Identified</span></td>
+      <td>Feb 2026</td>
+    </tr>
+  </tbody>
+</table>
+
+Synergy Matrix:
+<table class="matrix-table">
+  <thead><tr><th></th><th>Co A</th><th>Co B</th><th>Co C</th></tr></thead>
+  <tbody>
+    <tr><th>Co A</th><td class="self">&mdash;</td><td class="has-opportunity">2</td><td>0</td></tr>
+    <tr><th>Co B</th><td class="has-opportunity">2</td><td class="self">&mdash;</td><td class="has-opportunity">1</td></tr>
+    <tr><th>Co C</th><td>0</td><td class="has-opportunity">1</td><td class="self">&mdash;</td></tr>
+  </tbody>
+</table>
+
+Opportunity Types Breakdown:
+<div class="type-cards">
+  <div class="type-card"><div class="type-label">Customer-Supplier</div><div class="type-count">3</div></div>
+  <div class="type-card"><div class="type-label">Technology</div><div class="type-count">2</div></div>
+  <div class="type-card"><div class="type-label">Shared Market</div><div class="type-count">1</div></div>
+  <div class="type-card"><div class="type-label">Co-development</div><div class="type-count">0</div></div>
+  <div class="type-card"><div class="type-label">Cross-selling</div><div class="type-count">1</div></div>
+  <div class="type-card"><div class="type-label">Talent/Expertise</div><div class="type-count">0</div></div>
+</div>
+
+Type badges: type-customer-supplier, type-technology, type-shared-market, type-co-development, type-cross-selling, type-talent
+Impact badges: impact-high, impact-medium, impact-low
+Status badges: status-identified, status-exploring, status-active, status-realized
+-->
+
+<div class="footer">
+  Portfolio Collaboration Opportunities &middot; Generated by Claude &middot; Updated each processing cycle
+</div>
+
+</body>
+</html>

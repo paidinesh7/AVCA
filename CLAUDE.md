@@ -17,6 +17,8 @@ portfolio-tracker/
 ├── Claude Summary/                    ← All Claude-generated outputs
 │   ├── Portfolio Dashboard.html       ← One-page view of all companies (open in browser)
 │   ├── Red Flags & Follow-ups.html   ← Action items, warnings, promises to track
+│   ├── Promise Tracker.html          ← Accountability dashboard — tracks company commitments
+│   ├── Collaboration Opportunities.html ← Cross-portfolio synergies (externally shareable)
 │   ├── Team Update - {Mon} {Year}.html ← Shareable update for the team
 │   ├── Running Summary.md             ← Detailed per-company analysis
 │   └── Monthly Report - {Mon} {Year}.md ← End-of-month compilation
@@ -43,11 +45,13 @@ Process ONE company per cycle. Read all files for that company, write the summar
 ### Don't over-read files
 Read PDF/documents one page-range at a time (max 5-10 pages per call). For Excel files, read sheet names first, then prioritize P&L, KPIs, and summary sheets before diving into detail tabs.
 
-### Update three files after each company
-After processing each company, update ALL THREE outputs:
+### Update five files after each company
+After processing each company, update ALL FIVE outputs:
 1. `Running Summary.md` — append the detailed analysis
 2. `Portfolio Dashboard.html` — update that company's row
 3. `Red Flags & Follow-ups.html` — add any new flags
+4. `Promise Tracker.html` — add any new promises, verify previous promises if data available
+5. `Collaboration Opportunities.html` — add any cross-portfolio synergies identified
 
 ### Always end with a question
 After completing a company, ask the user which company to process next. Don't chain automatically.
@@ -71,15 +75,17 @@ _No files processed yet. Drop update files into company folders and run Claude._
 ### 1. Processing New Updates
 1. **Detect new files:** Run `bash detect_new_files.sh` or ask Claude to scan for new files
 2. **Process one company at a time.** Claude reads the files, extracts data, writes the summary following the Standard Template below
-3. **After each company, Claude updates three outputs:** Running Summary, Dashboard (HTML), Red Flags (HTML)
+3. **After each company, Claude updates five outputs:** Running Summary, Dashboard (HTML), Red Flags (HTML), Promise Tracker (HTML), Collaboration Opportunities (HTML)
 4. **After all companies are done:** Claude generates/updates the Team Update HTML
-5. **At end of month:** Claude compiles the Monthly Report from Dashboard + Red Flags + Running Summary
+5. **At end of month:** Claude compiles the Monthly Report from Dashboard + Red Flags + Promise Tracker + Running Summary
 
 ### 2. Incremental Updates (Same Company, New Quarter)
 When a new file arrives for a company already in the Running Summary:
 - Claude adds a **dated update section** under that company (not a full rewrite)
 - Claude compares new numbers against the prior period already in the summary
 - Dashboard and Red Flags are updated to reflect the latest data
+- **Promise verification:** Check the Promise Tracker for any prior promises from this company. Update their status (Delivered, Partially Delivered, Missed) based on the new data. Add any new promises found.
+- **Collaboration review:** Re-assess collaboration opportunities now that new data is available. Update existing opportunities or add new ones.
 
 ### 3. Monthly Report
 At end of each month, compile all updates into `Monthly Report - {Month} {Year}.md`:
@@ -124,6 +130,16 @@ Customers, users, headcount, capacity utilization — whatever is relevant to th
 Numbered list. Be direct. Flag problems clearly — don't sugarcoat.
 At least 3 specific concerns per company.
 
+### Promises & Forward Guidance
+Table with: Promise | Category | Target Date | Status
+Record every forward-looking commitment: revenue targets, product launches, hiring plans, fundraising timelines, operational milestones.
+If this is an incremental update, verify prior promises against actual results.
+
+### Collaboration Notes
+Identify potential synergies with other portfolio companies.
+Note: customer-supplier fits, technology integrations, shared markets, co-development opportunities.
+Keep the tone constructive — these notes feed into the externally-shareable Collaboration Opportunities dashboard.
+
 ### Investor Questions
 At least 5 specific questions. Reference actual data points from the update.
 Not generic ("how's growth?") — specific ("Q3 gross margin dropped from 57% to 48%, what caused it?").
@@ -140,6 +156,10 @@ Before marking a company as processed, verify:
 - [ ] Questions: at least 5 specific investor questions written
 - [ ] Dashboard HTML updated with this company's row
 - [ ] Red Flags HTML updated with any new flags
+- [ ] Promises extracted and added to Promise Tracker HTML
+- [ ] Previous promises from this company verified (if incremental update)
+- [ ] Collaboration opportunities identified and added to Collaboration Opportunities HTML
+- [ ] Both new HTML files (Promise Tracker, Collaboration Opportunities) updated
 
 ## What to Extract From Each Update
 - Company basics (what they do, founder, sector)
@@ -150,15 +170,87 @@ Before marking a company as processed, verify:
 - Budget vs actuals if available
 - Cash position, burn rate, runway
 - Forward guidance / projections
+- **Promises and commitments** — revenue targets, product launch dates, hiring plans, fundraising timelines, operational milestones. Anything the company says it will do by a specific date or quarter.
 - Red flags (margin compression, cash burn, customer concentration, runway concerns)
+- **Potential synergies** — customer-supplier fits with other portfolio companies, shared technology, overlapping markets, co-development or cross-selling opportunities
 - Questions an investor should ask the founder
+
+## Promise Extraction Rules
+
+### What Counts as a Promise
+A promise is any forward-looking commitment with a specific or implied timeframe:
+- **Financial targets:** "We expect to hit ₹10Cr revenue by Q4", "Targeting 60% gross margin by March"
+- **Product milestones:** "Launching v2 in Q1", "Mobile app expected by June"
+- **Operational goals:** "Hiring 50 engineers by year-end", "Opening 3 new warehouses in H2"
+- **Fundraising:** "Planning Series B in Q2 2026", "Targeting $20M raise"
+- **Partnerships/deals:** "Expecting to close enterprise deal with X by Q3"
+
+Do NOT record vague aspirations without timeframes (e.g., "we want to grow faster"). Only track commitments with measurable outcomes.
+
+### How to Record Promises
+Each promise entry must include:
+- **Company** — which company made the promise
+- **Promise** — exact commitment, quoted where possible
+- **Category** — Financial, Product, Operational, or Fundraising
+- **Source** — which file/update the promise came from, with date
+- **Target date** — when they said they'd deliver (quarter or specific date)
+- **Status** — current status (see below)
+
+### Promise Status Definitions
+- **Pending** — recorded, not yet due, no update available
+- **On Track** — subsequent update shows progress toward delivery
+- **Delivered** — commitment met, verified with data
+- **Partially Delivered** — some progress but fell short of the full commitment
+- **Missed** — target date passed without delivery or explicit acknowledgment
+- **Expired** — no longer relevant (company pivoted, target changed, etc.)
+
+### Verification Process
+When processing an incremental update for a company:
+1. Check the Promise Tracker for all open promises from that company
+2. Look for evidence in the new data that confirms or contradicts each promise
+3. Update the status with a brief note explaining the evidence
+4. If a promise was missed, flag it in Red Flags as well
+5. Record any new promises found in the current update
+
+## Collaboration Identification Rules
+
+### Opportunity Types
+- **Customer-Supplier** — one portfolio company could be a customer of another
+- **Technology Integration** — companies whose tech stacks or platforms could integrate
+- **Shared Market** — companies targeting the same customer segment from different angles
+- **Co-development** — companies that could jointly build a product or feature
+- **Cross-selling** — companies whose sales teams could refer business to each other
+- **Talent/Expertise** — companies that could share knowledge, advisors, or talent pools
+
+### How to Record Opportunities
+Each opportunity entry must include:
+- **Company A** and **Company B** — the two companies involved
+- **Type** — one of the types above
+- **Description** — specific, actionable description of the synergy
+- **Impact** — High, Medium, or Low (based on potential revenue/strategic value)
+- **Status** — Identified, Exploring, Active, or Realized
+- **Date identified** — when the opportunity was first noted
+
+### Impact Assessment
+- **High** — could materially affect revenue, costs, or strategic positioning for either company
+- **Medium** — useful but not transformative; operational efficiency or modest revenue potential
+- **Low** — nice-to-have; informational or networking value
+
+### Tone Requirements
+The Collaboration Opportunities dashboard is **externally shareable** — founders and co-investors may see it. Therefore:
+- Use constructive, opportunity-focused language
+- Do NOT include confidential financials or internal red flags
+- Frame synergies as value-creation opportunities, not obligations
+- Be specific enough to be actionable but not so detailed that it exposes sensitive data
 
 ## Analyst Principles
 - **Be direct.** Flag problems clearly — don't sugarcoat bad numbers.
 - **Trends over absolutes.** Always compare current period to prior periods.
 - **Skepticism on projections.** Note when forward guidance looks aggressive vs conservative.
-- **Track promises.** Record what companies say they'll do. Verify next quarter.
+- **Track promises.** Record what companies say they'll do. Verify next quarter. Use the Promise Tracker to hold companies accountable.
+- **Verify promises.** When processing incremental updates, always check prior promises against actual results. Flag misses clearly — a pattern of missed promises is a red flag in itself.
 - **Think like an investor.** What would you ask if your money was in this company?
+- **Find connections.** Actively look for synergies across portfolio companies. A well-connected portfolio creates more value than the sum of its parts.
 - **Consistent format.** Every summary follows the same template so they're easy to scan across companies.
 
 ## HTML Output Guidelines
@@ -168,6 +260,8 @@ When generating or updating HTML files (Dashboard, Red Flags, Team Update):
 - Use color coding: green for healthy signals, amber/yellow for watch items, red for urgent
 - Team Update should be written so it can be shared as-is — no internal notes or draft language
 - Include a "Last updated" date in the header of every HTML file
+- **Promise Tracker:** Use status badges (Pending=amber, On Track=light-green, Delivered=green, Partially Delivered=orange, Missed=red, Expired=gray) and category badges (Financial, Product, Operational, Fundraising). Group by urgency: overdue first, then due this quarter, then active, then resolved.
+- **Collaboration Opportunities:** Keep tone constructive and externally shareable — no confidential financials. Use impact badges (High=blue, Medium=amber, Low=gray). Include a synergy matrix showing opportunity counts between company pairs.
 
 ## Notes for Excel Files
 The Claude Read tool cannot handle .xlsx files directly. When encountering Excel files:
