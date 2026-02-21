@@ -49,17 +49,22 @@ Company folders MUST follow: `{Sector} - {Company Name}/`
 
 ## Critical Rules
 
-### Protect company data — everything stays local
-All company data processed by this tool is **confidential**. Every piece of data — raw files, extracted numbers, generated analysis — must stay on the local machine. Follow these rules without exception:
+### Protect company data
+All company data processed by this tool is **confidential**.
+
+**How data flows — be aware:**
+- When Claude Code reads a file, **the content is sent to Anthropic's API** for processing. This is how Claude Code works — it cannot analyze files locally.
+- Anthropic's data handling is governed by their [usage policy](https://www.anthropic.com/policies). Review it and ensure it meets your organization's requirements before processing sensitive data.
+- The protections below prevent company data from leaking **beyond Anthropic** — to git, to third-party services, or to the public internet.
 
 **All outputs stay local:**
 - Write all analysis ONLY to the designated local files (`Claude Summary/` outputs). Never write company data to any other location.
 - **Never suggest committing or pushing generated outputs** (Running Summary, Monthly Reports, Team Updates, or populated HTML dashboards) to git. The `.gitignore` blocks most of these, but the HTML template files (Dashboard, Red Flags, Promise Tracker, Collaboration Opportunities, Deal Flow) are tracked as empty templates. Once they contain company or pitch data, do NOT stage or commit them.
 - **Never include real company data in commit messages, PR descriptions, or git logs.** These are public if the repo is pushed.
 
-**No external transmission:**
+**No transmission beyond Anthropic:**
 - **Never suggest uploading, emailing, or posting** company financials, investor updates, or generated analysis to any external service, API, or URL.
-- **Never run commands that send data over the network** — no `curl`, `wget`, `httpie`, `nc`, API calls, webhooks, or any tool that transmits data externally. All processing must use local-only tools (file reads, Python scripts for Excel parsing, etc.).
+- **Never run commands that send data to third-party services** — no `curl`, `wget`, `httpie`, `nc`, webhooks, or any tool that transmits data to services other than Anthropic's API (which Claude Code uses by design). Use local-only tools for file processing (file reads, Python scripts for Excel parsing, etc.).
 - **Never pipe or redirect company data** to any command that could transmit it (e.g., no `cat file | curl`, no writing to `/dev/tcp`, no logging to remote services).
 - **Never suggest installing packages or tools** to process company data — only use what's already available locally (`openpyxl` for Excel, standard Python, built-in shell tools). If a tool isn't available, ask the user to install it themselves.
 

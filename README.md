@@ -6,7 +6,7 @@ An AI-powered investment management tool for venture teams. It does two things:
 
 2. **Deal Flow Management** — Drop pitch decks into the Deal Flow folder. Claude scores each pitch on a 100-point rubric, ranks them by priority, and produces a single evaluation dashboard. When you invest, the company graduates to your portfolio.
 
-Both workflows run locally. All company data stays on your machine — nothing is sent over the network.
+All generated outputs stay on your machine. File contents are sent to Anthropic's API for analysis (that's how Claude works) but are never transmitted anywhere else.
 
 ## Quick Start
 
@@ -157,7 +157,13 @@ AVCA/
 
 ## Data Privacy
 
-This repo is designed to be **public** — it's a template others can clone and use. **All company data stays strictly local.** The protections are built in at multiple layers:
+This repo is designed to be **public** — it's a template others can clone and use. The protections are built in at multiple layers to prevent company data from leaking beyond what's necessary.
+
+### How data flows
+
+**When Claude Code reads your files, the content is sent to Anthropic's API for analysis.** This is inherent to how Claude Code works — it cannot process files locally. Anthropic's data handling is governed by their [usage policy](https://www.anthropic.com/policies). Review it and make sure it meets your organization's requirements before processing sensitive financial data.
+
+The protections below prevent company data from leaking **beyond Anthropic** — to git, to third-party services, or to the public internet.
 
 ### How your data is protected
 
@@ -169,10 +175,10 @@ This repo is designed to be **public** — it's a template others can clone and 
 
 **Layer 2 — Claude's instructions (`CLAUDE.md`):**
 - Claude is instructed to write all analysis **only** to local files in `Claude Summary/`
-- Claude will **never** run commands that send data over the network (no `curl`, `wget`, API calls, etc.)
+- Claude will **never** run commands that send data to third-party services (no `curl`, `wget`, webhooks, etc.)
 - Claude will **never** suggest uploading, emailing, or posting company data to any external service
 - Claude will **never** include company financials in commit messages or git logs
-- All processing uses local-only tools (file reads, Python/openpyxl for Excel, shell utilities)
+- File processing uses local tools where possible (Python/openpyxl for Excel, shell utilities)
 
 **Layer 3 — Offline HTML outputs:**
 - All HTML dashboards use **inline CSS only** — no external stylesheets, fonts, CDN links, analytics, or tracking
