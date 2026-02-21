@@ -1,7 +1,10 @@
-# Portfolio Tracker
+# AVCA
 
 ## What This Is
-An AI-powered portfolio tracking system for investment teams. Drop company updates (PDFs, Excel files, PPTs) into folders. Claude reads them, extracts financials and key signals, and produces structured outputs — summaries, dashboards, red flag trackers, and team-shareable updates.
+An AI-powered investment management tool for venture teams. It does two things:
+
+1. **Portfolio Tracking** — Drop company updates (PDFs, Excel files, PPTs) into folders. Claude extracts financials, flags risks, tracks promises, and produces structured dashboards.
+2. **Deal Flow Management** — Drop pitch decks into the Deal Flow folder. Claude scores each pitch on a 100-point rubric, ranks them by priority, and produces an evaluation dashboard.
 
 ## How It Works
 1. Create a folder per company: `{Sector} - {Company Name}/`
@@ -11,7 +14,7 @@ An AI-powered portfolio tracking system for investment teams. Drop company updat
 
 ## Folder Structure
 ```
-portfolio-tracker/
+AVCA/
 ├── CLAUDE.md                          ← You are here. Instructions for Claude.
 ├── detect_new_files.sh                ← Run to check for unprocessed files
 ├── Claude Summary/                    ← All Claude-generated outputs
@@ -51,7 +54,7 @@ All company data processed by this tool is **confidential**. Every piece of data
 
 **All outputs stay local:**
 - Write all analysis ONLY to the designated local files (`Claude Summary/` outputs). Never write company data to any other location.
-- **Never suggest committing or pushing generated outputs** (Running Summary, Monthly Reports, Team Updates, or populated HTML dashboards) to git. The `.gitignore` blocks most of these, but the HTML template files (Dashboard, Red Flags, Promise Tracker, Collaboration Opportunities) are tracked as empty templates. Once they contain company data, do NOT stage or commit them.
+- **Never suggest committing or pushing generated outputs** (Running Summary, Monthly Reports, Team Updates, or populated HTML dashboards) to git. The `.gitignore` blocks most of these, but the HTML template files (Dashboard, Red Flags, Promise Tracker, Collaboration Opportunities, Deal Flow) are tracked as empty templates. Once they contain company or pitch data, do NOT stage or commit them.
 - **Never include real company data in commit messages, PR descriptions, or git logs.** These are public if the repo is pushed.
 
 **No external transmission:**
@@ -214,7 +217,6 @@ Before marking a company as processed, verify:
 - [ ] Promises extracted and added to Promise Tracker HTML
 - [ ] Previous promises from this company verified (if incremental update)
 - [ ] Collaboration opportunities identified and added to Collaboration Opportunities HTML
-- [ ] Both new HTML files (Promise Tracker, Collaboration Opportunities) updated
 
 ## What to Extract From Each Update
 - Company basics (what they do, founder, sector)
